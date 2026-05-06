@@ -1,0 +1,32 @@
+replicaCount: 1
+
+# This sets the container image (change tag/repo as needed)
+image:
+  repository: "nitinhumancloud/attendee"
+  tag: "latest"           # use "local" if you built & kind-loaded it; change to "latest" for registry images
+  pullPolicy: IfNotPresent
+
+existingSecretName: "attendee-secrets"
+
+# Environment variables used by your deployment template (non-sensitive defaults)
+app:
+  command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+  env:
+    DJANGO_SETTINGS_MODULE: "attendee.settings.development"
+    ENABLE_CHROME_SANDBOX: "false"
+
+# Service configuration (exposes your app)
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000   # Django runs on port 8000 inside the container
+  # nodePort: 30080  # Uncomment if type is NodePort
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi

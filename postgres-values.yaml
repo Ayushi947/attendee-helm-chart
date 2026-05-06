@@ -1,0 +1,11 @@
+
+auth:
+  postgresPassword: postgrespw
+  username: attendee_development_user
+  password: attendee_development_user
+  database: attendee_development
+
+primary:
+  persistence:
+    enabled: true
+    size: 10Gi

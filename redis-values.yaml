@@ -1,0 +1,29 @@
+architecture: replication
+
+auth:
+  enabled: false
+  password: ""
+
+master:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
+
+replica:
+  replicaCount: 2
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+networkPolicy:
+  enabled: false

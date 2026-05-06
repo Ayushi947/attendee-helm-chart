@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: attendee
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.app.command }}
+          command: {{ .Values.app.command | toJson }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          {{- if .Values.resources }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          env:
+            # Non-secret app settings
+            - name: DJANGO_SETTINGS_MODULE
+              value: {{ .Values.app.env.DJANGO_SETTINGS_MODULE | quote }}
+            - name: ENABLE_CHROME_SANDBOX
+              value: {{ .Values.app.env.ENABLE_CHROME_SANDBOX | quote }}
+
+            # Postgres connection (all values from secret)
+            - name: POSTGRES_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: POSTGRES_PORT
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: POSTGRES_DB
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: POSTGRES_PASSWORD
+            # Redis connection (from secret)
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: REDIS_URL
+            # Inject keys from your existing secret for app/AWS sensitive values
+            - name: CREDENTIALS_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: CREDENTIALS_ENCRYPTION_KEY
+            - name: DJANGO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: DJANGO_SECRET_KEY
+            - name: AWS_RECORDING_STORAGE_BUCKET_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: AWS_RECORDING_STORAGE_BUCKET_NAME
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecretName | quote }}
+                  key: AWS_DEFAULT_REGION
