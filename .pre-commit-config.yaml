@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/norwoodj/helm-docs
+    rev: v1.14.2
+    hooks:
+      - id: helm-docs
+        args:
+          - --chart-search-root=attendee
+
+  - repo: local
+    hooks:
+      - id: helm-lint
+        name: helm lint
+        entry: bash -c 'helm lint attendee --debug'
+        language: system
+        pass_filenames: false
+        files: \.(yaml|yml|tpl)$
+
+      - id: helm-template
+        name: helm template
+        entry: bash -c 'helm template attendee --debug > /dev/null'
+        language: system
+        pass_filenames: false
+        files: \.(yaml|yml|tpl)$
